@@ -2,6 +2,7 @@ import pygame
 from player import Player
 from obj import *
 import obj
+import pytmx
 class Game:
     def __init__(self):
             
