@@ -63,6 +63,12 @@ class Game:
         for tile in self.tile_group:
             tile.rect.x += self.dx
             tile.rect.y += self.dy
+        for tile in self.collision_group:
+            if self.player.player.colliderect(tile):
+                for tiles in self.tile_group:
+                    tiles.rect.x -= self.dx
+                    tiles.rect.y -= self.dy
+        
 
 
     
