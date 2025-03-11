@@ -10,14 +10,17 @@ class Game:
         self.player_dir = "down"
         self.player_speed = 5
         self.tile_group = pygame.sprite.Group()
-        self.collision_group = pygame.sprite.Group()
+        self.obj_group = pygame.sprite.Group()
+        self.colliders = []
         self.tmx_data = load_pygame("maps/map1.tmx")
         self.dx = 0
         self.dy = 0
         self.start_x = 300
         self.start_y = 300
+        
 
         self.load_map()
+        print(self.colliders)
 
 
     def run_game(self):
@@ -27,9 +30,10 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
-        
+            
             self.tile_group.draw(self.screen)
             self.player.animate(self.player_dir)
+            self.obj_group.draw(self.screen)
             self.move()
             pygame.time.Clock().tick(60)
             pygame.display.flip()
@@ -65,28 +69,45 @@ class Game:
         for tile in self.tile_group:
             tile.rect.x += self.dx
             tile.rect.y += self.dy
-        for tile in self.collision_group:
-            if self.player.player.colliderect(tile):
+        for obj in self.obj_group:
+            obj.rect.x += self.dx
+            obj.rect.y += self.dy
+        for collider in self.colliders:
+            collider.y += self.dy
+            collider.x += self.dx
+
+
+        for collider in self.colliders:
+            if self.player.player.colliderect(collider):
                 for tiles in self.tile_group:
                     tiles.rect.x -= self.dx
                     tiles.rect.y -= self.dy
+                for obj in self.obj_group:
+                    obj.rect.x -= self.dx
+                    obj.rect.y -= self.dy
+                for collider in self.colliders:
+                    collider.x -= self.dx
+                    collider.y -= self.dy
+                    
         
-
-
-    
-
-
-
     def load_map(self):
         for layer in self.tmx_data.layers:
-            if layer.name in ("Tile Layer 1", "Extra"):
+            if layer.name in ("GROUND", "GROUND2"):
                 for x, y, surf in layer.tiles():
                     pos = (x*50-self.start_x, y*50-self.start_y)
                     Tile(pos= pos, surface = surf, groups = self.tile_group)
-
-            if layer.name in ("Collide"):
+            if layer.name in ("OBJ"):
                 for x, y, surf in layer.tiles():
                     pos = (x*50-self.start_x, y*50-self.start_y)
-                    object = Tile(pos = pos, surface = surf, groups = self.tile_group)
-                    self.collision_group.add(object)
+                    Tile(pos= pos, surface = surf, groups = self.obj_group)
+
+        for obj in self.tmx_data.objects:
+            scale_factor = 50/32
+            object = pygame.Rect(obj.x*scale_factor - self.start_x, obj.y*scale_factor - self.start_y, obj.width*scale_factor, obj.height*scale_factor)
+            self.colliders.append(object)
+
+
+
+
+    
                     

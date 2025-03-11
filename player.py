@@ -4,7 +4,7 @@ class Player:
     def __init__(self, screen):
         self.x, self.y = 0, 0
         image = pygame.image.load("sprites/player3.png")
-        self.image = pygame.transform.scale(image, (50, 50))
+        self.image = pygame.transform.scale(image, (45, 45))
         self.player = self.image.get_rect(topleft = (300, 300))
         self.screen = screen
         self.timer = 10
@@ -60,6 +60,6 @@ class Player:
                 new_image = pygame.image.load("sprites/player5.png")
         
         
-        scaled_image = pygame.transform.scale(new_image, (50, 50))
+        scaled_image = pygame.transform.scale(new_image, (45, 45))
         self.screen.blit(scaled_image, self.player)
 
