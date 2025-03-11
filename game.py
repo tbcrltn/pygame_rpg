@@ -14,6 +14,8 @@ class Game:
         self.tmx_data = load_pygame("maps/map1.tmx")
         self.dx = 0
         self.dy = 0
+        self.start_x = 300
+        self.start_y = 300
 
         self.load_map()
 
@@ -79,12 +81,12 @@ class Game:
         for layer in self.tmx_data.layers:
             if layer.name in ("Tile Layer 1", "Extra"):
                 for x, y, surf in layer.tiles():
-                    pos = (x*50, y*50)
+                    pos = (x*50-self.start_x, y*50-self.start_y)
                     Tile(pos= pos, surface = surf, groups = self.tile_group)
 
             if layer.name in ("Collide"):
                 for x, y, surf in layer.tiles():
-                    pos = (x*50, y*50)
+                    pos = (x*50-self.start_x, y*50-self.start_y)
                     object = Tile(pos = pos, surface = surf, groups = self.tile_group)
                     self.collision_group.add(object)
                     
