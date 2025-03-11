@@ -12,15 +12,16 @@ class Game:
         self.tile_group = pygame.sprite.Group()
         self.obj_group = pygame.sprite.Group()
         self.colliders = []
+        self.interactive_objs = []
+        self.interact = []
         self.tmx_data = load_pygame("maps/map1.tmx")
         self.dx = 0
         self.dy = 0
         self.start_x = 300
         self.start_y = 300
-        
 
         self.load_map()
-        print(self.colliders)
+        print(self.interactive_objs)
 
 
     def run_game(self):
@@ -61,6 +62,8 @@ class Game:
             self.player_dir = "right"
             self.dx = -self.player_speed
             self.player.moving = True
+        elif keys[pygame.K_SPACE]:
+            self.check_interaction()
         else:
             self.player.moving = False
 
@@ -88,6 +91,14 @@ class Game:
                 for collider in self.colliders:
                     collider.x -= self.dx
                     collider.y -= self.dy
+
+    def check_interaction(self):
+        for box in self.interactive_objs:
+            if self.player.player.colliderect(box):
+                print("interacting")
+                self.tmx_data = self.interact[self.interactive_objs.index(box)]
+                self.load_map()
+
                     
         
     def load_map(self):
@@ -96,15 +107,27 @@ class Game:
                 for x, y, surf in layer.tiles():
                     pos = (x*50-self.start_x, y*50-self.start_y)
                     Tile(pos= pos, surface = surf, groups = self.tile_group)
-            if layer.name in ("OBJ"):
+            elif layer.name in ("OBJ"):
                 for x, y, surf in layer.tiles():
                     pos = (x*50-self.start_x, y*50-self.start_y)
                     Tile(pos= pos, surface = surf, groups = self.obj_group)
+            elif layer.name == "Collide":
+                for obj in layer:
+                    scale_factor = 50/32
+                    object = pygame.Rect(obj.x*scale_factor - self.start_x, obj.y*scale_factor - self.start_y, obj.width*scale_factor, obj.height*scale_factor)
+                    self.colliders.append(object)
+            elif layer.name == "Interactive":
+                counter = 0
+                for obj in layer:
+                    counter += 1
+                    scale_factor = 50/32
+                    object = pygame.Rect(obj.x*scale_factor - self.start_x, obj.y*scale_factor - self.start_y, obj.width*scale_factor, obj.height*scale_factor)
+                    if counter == 1:
+                        self.interactive_objs.append(object)
+                        self.interact.append("maps/room1.tmx")
+                
 
-        for obj in self.tmx_data.objects:
-            scale_factor = 50/32
-            object = pygame.Rect(obj.x*scale_factor - self.start_x, obj.y*scale_factor - self.start_y, obj.width*scale_factor, obj.height*scale_factor)
-            self.colliders.append(object)
+            
 
 
 
