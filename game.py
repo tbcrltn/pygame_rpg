@@ -78,6 +78,9 @@ class Game:
         for collider in self.colliders:
             collider.y += self.dy
             collider.x += self.dx
+        for collider in self.interactive_objs:
+            collider.y += self.dy
+            collider.x += self.dx
 
 
         for collider in self.colliders:
@@ -89,6 +92,9 @@ class Game:
                     obj.rect.x -= self.dx
                     obj.rect.y -= self.dy
                 for collider in self.colliders:
+                    collider.x -= self.dx
+                    collider.y -= self.dy
+                for collider in self.interactive_objs:
                     collider.x -= self.dx
                     collider.y -= self.dy
 
@@ -125,7 +131,7 @@ class Game:
                     if counter == 1:
                         self.interactive_objs.append(object)
                         self.interact.append("maps/room1.tmx")
-                
+                        print("counted")
 
             
 
