@@ -2,6 +2,7 @@ import pygame
 from player import Player
 from map import *
 from pytmx.util_pygame import load_pygame
+import time
 
 class Game:
     def __init__(self):
@@ -15,13 +16,16 @@ class Game:
         self.interactive_objs = []
         self.interact = []
         self.new_map_pos = []
+        self.map = 1
         self.tmx_data = load_pygame("maps/map1.tmx")
         self.dx = 0
         self.dy = 0
         self.start_x = 300
         self.start_y = 300
+        self.playerx = -self.start_x
+        self.playery = -self.start_y
 
-        self.load_map(300, 300)
+        self.load_map(self.start_x, self.start_y)
         print(self.interactive_objs)
 
 
@@ -32,7 +36,7 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
-            
+            print(f"Player @ {-self.playerx}, {-self.playery}")
             self.tile_group.draw(self.screen)
             self.player.animate(self.player_dir)
             self.obj_group.draw(self.screen)
@@ -98,20 +102,19 @@ class Game:
                 for collider in self.interactive_objs:
                     collider.x -= self.dx
                     collider.y -= self.dy
+                self.playerx -= self.dx
+                self.playery-= self.dy
+        self.playerx += self.dx
+        self.playery += self.dy
 
     def check_interaction(self):
         for box in self.interactive_objs:
             if self.player.player.colliderect(box):
-                print("interacting")
-                self.tmx_data = load_pygame(self.interact[self.interactive_objs.index(box)])
-                player = self.new_map_pos[self.interactive_objs.index(box)]
-                print(player)
-                self.obj_group.empty()
-                self.tile_group.empty()
-                self.interactive_objs = []
-                self.interact = []
-                self.new_map_pos = []
-                self.load_map(player[0], player[1])
+                self.map = self.interact[self.interactive_objs.index(box)]
+                map_pos = self.interactive_objs.index(box)
+                print(self.map)
+                self.new_map(self.map, map_pos)
+            
                 
 
                     
@@ -119,6 +122,8 @@ class Game:
     def load_map(self, x, y):
         self.start_y = y
         self.start_x = x
+        self.playerx = -x
+        self.playery = -y
         for layer in self.tmx_data.layers:
             if layer.name in ("GROUND", "GROUND2"):
                 for x, y, surf in layer.tiles():
@@ -139,14 +144,31 @@ class Game:
                     counter += 1
                     scale_factor = 50/32
                     object = pygame.Rect(obj.x*scale_factor - self.start_x, obj.y*scale_factor - self.start_y, obj.width*scale_factor, obj.height*scale_factor)
-                    if counter == 1:
+                    if counter == 1 and self.map == 1:
                         self.interactive_objs.append(object)
-                        self.interact.append("maps/map2.tmx")
-                        self.new_map_pos.append((1500, 1500))
+                        self.interact.append(2)
+                        self.new_map_pos.append((1680, 1660))
+                    elif counter == 1 and self.map == 2:
+                        self.interactive_objs.append(object)
+                        self.interact.append(1)
+                        self.new_map_pos.append((3330, 260))
             
             
-
-
+    def new_map(self, map, map_pos):
+        timer = 1
+        self.player_dir = "down"
+        map = str(map)
+        self.tmx_data = load_pygame(f"maps/map{map}.tmx")
+        player = self.new_map_pos[map_pos]
+        print(player)
+        self.obj_group.empty()
+        self.tile_group.empty()
+        self.interactive_objs = []
+        self.interact = []
+        self.new_map_pos = []
+        self.colliders = []
+        self.load_map(player[0], player[1])
+        time.sleep(timer)
 
 
     
