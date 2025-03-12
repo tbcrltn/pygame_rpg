@@ -149,7 +149,7 @@ class Game:
                         self.interactive_objs.append(object)
                         self.interact.append(2)
                         self.new_map_pos.append((1680, 1660))
-                    elif counter == 2 and self.map == 2:
+                    elif counter == 1 and self.map == 2:
                         self.interactive_objs.append(object)
                         self.interact.append(1)
                         self.new_map_pos.append((3330, 260))
