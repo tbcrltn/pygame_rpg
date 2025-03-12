@@ -36,7 +36,7 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
-            print(f"Player @ {-self.playerx}, {-self.playery}")
+            #print(f"Player @ {-self.playerx}, {-self.playery}")
             self.tile_group.draw(self.screen)
             self.player.animate(self.player_dir)
             self.obj_group.draw(self.screen)
@@ -110,6 +110,7 @@ class Game:
     def check_interaction(self):
         for box in self.interactive_objs:
             if self.player.player.colliderect(box):
+                print(f"colliding with box {self.interactive_objs.index(box)}")
                 self.map = self.interact[self.interactive_objs.index(box)]
                 map_pos = self.interactive_objs.index(box)
                 print(self.map)
@@ -148,11 +149,11 @@ class Game:
                         self.interactive_objs.append(object)
                         self.interact.append(2)
                         self.new_map_pos.append((1680, 1660))
-                    elif counter == 1 and self.map == 2:
+                    elif counter == 2 and self.map == 2:
                         self.interactive_objs.append(object)
                         self.interact.append(1)
                         self.new_map_pos.append((3330, 260))
-            
+                        print(counter)
             
     def new_map(self, map, map_pos):
         timer = 1
