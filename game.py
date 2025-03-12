@@ -14,13 +14,14 @@ class Game:
         self.colliders = []
         self.interactive_objs = []
         self.interact = []
+        self.new_map_pos = []
         self.tmx_data = load_pygame("maps/map1.tmx")
         self.dx = 0
         self.dy = 0
         self.start_x = 300
         self.start_y = 300
 
-        self.load_map()
+        self.load_map(300, 300)
         print(self.interactive_objs)
 
 
@@ -102,12 +103,22 @@ class Game:
         for box in self.interactive_objs:
             if self.player.player.colliderect(box):
                 print("interacting")
-                self.tmx_data = self.interact[self.interactive_objs.index(box)]
-                self.load_map()
+                self.tmx_data = load_pygame(self.interact[self.interactive_objs.index(box)])
+                player = self.new_map_pos[self.interactive_objs.index(box)]
+                print(player)
+                self.obj_group.empty()
+                self.tile_group.empty()
+                self.interactive_objs = []
+                self.interact = []
+                self.new_map_pos = []
+                self.load_map(player[0], player[1])
+                
 
                     
         
-    def load_map(self):
+    def load_map(self, x, y):
+        self.start_y = y
+        self.start_x = x
         for layer in self.tmx_data.layers:
             if layer.name in ("GROUND", "GROUND2"):
                 for x, y, surf in layer.tiles():
@@ -130,9 +141,9 @@ class Game:
                     object = pygame.Rect(obj.x*scale_factor - self.start_x, obj.y*scale_factor - self.start_y, obj.width*scale_factor, obj.height*scale_factor)
                     if counter == 1:
                         self.interactive_objs.append(object)
-                        self.interact.append("maps/room1.tmx")
-                        print("counted")
-
+                        self.interact.append("maps/map2.tmx")
+                        self.new_map_pos.append((1500, 1500))
+            
             
 
 
