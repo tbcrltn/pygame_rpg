@@ -1,6 +1,6 @@
 import pygame
 from player import Player
-from map import *
+from map import Tile
 from pytmx.util_pygame import load_pygame
 import time
 
