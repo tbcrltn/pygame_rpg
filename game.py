@@ -3,6 +3,7 @@ from player import Player
 from map import Tile
 from pytmx.util_pygame import load_pygame
 import time
+import gif_pygame
 
 class Game:
     def __init__(self):
@@ -25,7 +26,9 @@ class Game:
         self.playerx = -self.start_x
         self.playery = -self.start_y
         self.font_init()
-
+        self.keys = []
+        self.key_rect = []
+        self.new_key(180, 870)
         self.load_map(self.start_x, self.start_y)
         print(self.interactive_objs)
 
@@ -43,6 +46,7 @@ class Game:
             self.obj_group.draw(self.screen)
             self.move()
             self.check_interactive_collision()
+            self.draw_keys()
             pygame.time.Clock().tick(60)
             pygame.display.flip()
         pygame.quit()
@@ -88,6 +92,9 @@ class Game:
         for collider in self.interactive_objs:
             collider.y += self.dy
             collider.x += self.dx
+        for key in self.key_rect:
+            key.x += self.dx
+            key.y += self.dy
 
 
         for collider in self.colliders:
@@ -104,6 +111,9 @@ class Game:
                 for collider in self.interactive_objs:
                     collider.x -= self.dx
                     collider.y -= self.dy
+                for key in self.key_rect:
+                    key.x -= self.dx
+                    key.y -= self.dy
                 self.playerx -= self.dx
                 self.playery-= self.dy
         self.playerx += self.dx
@@ -191,5 +201,14 @@ class Game:
     def display_interaction(self):
         
         self.screen.blit(self.text, (20, 680))
-    
+    def draw_keys(self):
+        for key in self.keys:
+            x = self.key_rect[self.keys.index(key)].x
+            y = self.key_rect[self.keys.index(key)].y
+            key.render(self.screen, (x, y))
+    def new_key(self, x, y):
+        key = gif_pygame.load("sprites/key.gif")
+        self.keys.append(key)
+        key_rect = key.get_rect(center = (x, y))
+        self.key_rect.append(key_rect)
                     
