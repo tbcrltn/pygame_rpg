@@ -24,6 +24,7 @@ class Game:
         self.start_y = 300
         self.playerx = -self.start_x
         self.playery = -self.start_y
+        self.font_init()
 
         self.load_map(self.start_x, self.start_y)
         print(self.interactive_objs)
@@ -36,11 +37,12 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
-            #print(f"Player @ {-self.playerx}, {-self.playery}")
+            print(f"Player @ {-self.playerx}, {-self.playery}")
             self.tile_group.draw(self.screen)
             self.player.animate(self.player_dir)
             self.obj_group.draw(self.screen)
             self.move()
+            self.check_interactive_collision()
             pygame.time.Clock().tick(60)
             pygame.display.flip()
         pygame.quit()
@@ -67,7 +69,7 @@ class Game:
             self.player_dir = "right"
             self.dx = -self.player_speed
             self.player.moving = True
-        elif keys[pygame.K_SPACE]:
+        elif keys[pygame.K_SPACE] or keys[pygame.K_e]:
             self.check_interaction()
         else:
             self.player.moving = False
@@ -115,6 +117,10 @@ class Game:
                 map_pos = self.interactive_objs.index(box)
                 print(self.map)
                 self.new_map(self.map, map_pos)
+    def check_interactive_collision(self):
+        for box in self.interactive_objs:
+            if self.player.player.colliderect(box):
+                self.display_interaction()
             
                 
 
@@ -154,6 +160,14 @@ class Game:
                         self.interact.append(1)
                         self.new_map_pos.append((3330, 260))
                         print(counter)
+                    elif counter == 2 and self.map == 2:
+                        self.interactive_objs.append(object)
+                        self.interact.append(3)
+                        self.new_map_pos.append((180,265))
+                    elif counter == 1 and self.map == 3:
+                        self.interactive_objs.append(object)
+                        self.interact.append(2)
+                        self.new_map_pos.append((1680,870))
             
     def new_map(self, map, map_pos):
         timer = 1
@@ -170,7 +184,12 @@ class Game:
         self.colliders = []
         self.load_map(player[0], player[1])
         time.sleep(timer)
-
-
+    def font_init(self):
+        pygame.font.init()
+        self.font = pygame.font.Font("fonts/pixel.ttf", 20)
+        self.text = self.font.render("INTERACT [SPACE] OR [E]", False, "black")
+    def display_interaction(self):
+        
+        self.screen.blit(self.text, (20, 680))
     
                     
