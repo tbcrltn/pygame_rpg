@@ -11,6 +11,7 @@ class Game:
         self.player = Player(self.screen)
         self.player_dir = "down"
         self.player_speed = 5
+        self.coins = 0
         self.tile_group = pygame.sprite.Group()
         self.obj_group = pygame.sprite.Group()
         self.colliders = []
@@ -41,7 +42,7 @@ class Game:
         self.running = True
         while self.running:
             self.check_events()
-            print(f"Player @ {-self.playerx}, {-self.playery}")
+            #print(f"Player @ {-self.playerx}, {-self.playery}")
             self.tile_group.draw(self.screen)
             self.player.animate(self.player_dir)
             self.obj_group.draw(self.screen)
@@ -49,6 +50,7 @@ class Game:
             self.draw_keys()
             self.draw_chests()
             self.display_keys_held()
+            self.display_money()
             self.check_key_collision()
             self.chest_collision()
             self.move()
@@ -211,7 +213,7 @@ class Game:
         self.key_rect = []
         self.chests = []
         self.chest_rect = []
-        self.chest_contents = []
+        self.interactive_chest_rect = []
         self.create_keys()
         self.create_chests()
         time.sleep(timer)
@@ -274,25 +276,21 @@ class Game:
         self.interactive_chest_rect = []
         self.chest_rect = []
         self.opened_chests = []
-        self.chest_contents = []
         self.map_chests()
         self.create_chests()
 
     def map_chests(self):
-        self.map1chests = [(1035, 145)]
+        self.map1chests = [[1035, 145, 0]]
 
     def create_chests(self):
         if self.map == 1:
             for chest in self.map1chests:
-                if chest in self.opened_chests:
-                    self.new_chest(chest[0], chest[1], "open")
-                else:
-                    self.new_chest(chest[0], chest[1], "closed")
+                self.new_chest(chest[0], chest[1], chest[2])
 
     def new_chest(self, x, y, status):
-        if status == "closed":
+        if status == 0:
             chest_image = pygame.image.load("sprites/chest.png")
-        if status == "open":
+        if status == 1:
             chest_image = pygame.image.load("sprites/openchest.png")
         self.chests.append(chest_image)
         dist_x = -self.playerx - 300
@@ -313,22 +311,31 @@ class Game:
 
     def chest_collision(self):
         for chest in self.interactive_chest_rect:
-            if self.player.player.colliderect(chest):
-                if self.player_keys >= 1:
-                    self.display_interaction()
-                    key = pygame.key.get_pressed()
-                    if key[pygame.K_SPACE] or key[pygame.K_e]:
-                        index = self.interactive_chest_rect.index(chest)
-                        opened = self.chests[index]
-                        self.open_chest(opened, index)
+            index = self.interactive_chest_rect.index(chest)
+            if self.map == 1:
+                print(index)
+                if self.map1chests[index][2] == 0:
+                    self.check_chest_collision(chest)
+    
+    def check_chest_collision(self, chest):
+        if self.player.player.colliderect(chest):
+            if self.player_keys >= 1:
+                self.display_interaction()
+                key = pygame.key.get_pressed()
+                if key[pygame.K_SPACE] or key[pygame.K_e]:
+                    index = self.interactive_chest_rect.index(chest)
+                    self.open_chest(index)
 
-    def open_chest(self, chest, index):
+    def open_chest(self, index):
         self.player_keys -= 1
-        self.opened_chests.append(chest)
+        if self.map == 1:
+            self.map1chests[index][2] = 1
         self.chests[index] = pygame.image.load("sprites/openchest.png")
-
-
+        self.coins += 5
                 
+    def display_money(self):
+        text = self.font.render(f"COINS: {self.coins}", False, "black")
+        self.screen.blit(text, (300, 10))         
         
 
     
