@@ -23,8 +23,8 @@ class Game:
         self.tmx_data = load_pygame("maps/map1.tmx")
         self.dx = 0
         self.dy = 0
-        self.start_x = 350
-        self.start_y = 2170
+        self.start_x = 300
+        self.start_y = 300
         self.playerx = -self.start_x
         self.playery = -self.start_y
         self.font_init()
