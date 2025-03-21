@@ -4,6 +4,7 @@ from map import Tile
 from pytmx.util_pygame import load_pygame
 import time
 import gif_pygame
+from merchant import Merchant
 
 class Game:
     def __init__(self):
@@ -22,8 +23,8 @@ class Game:
         self.tmx_data = load_pygame("maps/map1.tmx")
         self.dx = 0
         self.dy = 0
-        self.start_x = 300
-        self.start_y = 300
+        self.start_x = 350
+        self.start_y = 2170
         self.playerx = -self.start_x
         self.playery = -self.start_y
         self.font_init()
@@ -34,7 +35,7 @@ class Game:
         self.player_keys = 0
         self.load_map(self.start_x, self.start_y)
         self.create_keys()
-        print(self.interactive_objs)
+        self.merchant = Merchant(315, 2170, self.screen, self.map, self.colliders)
 
 
     def run_game(self):
@@ -42,17 +43,19 @@ class Game:
         self.running = True
         while self.running:
             self.check_events()
-            #print(f"Player @ {-self.playerx}, {-self.playery}")
+            print(f"Player @ {-self.playerx}, {-self.playery}")
             self.tile_group.draw(self.screen)
             self.player.animate(self.player_dir)
             self.obj_group.draw(self.screen)
             self.check_interactive_collision()
             self.draw_keys()
             self.draw_chests()
+            self.merchant.draw(self.playerx, self.playery)
             self.display_keys_held()
             self.display_money()
             self.check_key_collision()
             self.chest_collision()
+            self.check_merchant_interaction()
             self.move()
             pygame.time.Clock().tick(60)
             pygame.display.flip()
@@ -172,28 +175,38 @@ class Game:
                     object = pygame.Rect(obj.x*self.scale_factor - self.start_x, obj.y*self.scale_factor - self.start_y, obj.width*self.scale_factor, obj.height*self.scale_factor)
                     self.colliders.append(object)
             elif layer.name == "Interactive":
-                counter = 0
+                interactive = 0
                 for obj in layer:
-                    counter += 1
+                    interactive += 1
                     
                     object = pygame.Rect(obj.x*self.scale_factor - self.start_x, obj.y*self.scale_factor - self.start_y, obj.width*self.scale_factor, obj.height*self.scale_factor)
-                    if counter == 1 and self.map == 1:
-                        self.interactive_objs.append(object)
-                        self.interact.append(2)
-                        self.new_map_pos.append((1680, 1660))
-                    elif counter == 1 and self.map == 2:
-                        self.interactive_objs.append(object)
-                        self.interact.append(1)
-                        self.new_map_pos.append((3330, 260))
-                        print(counter)
-                    elif counter == 2 and self.map == 2:
-                        self.interactive_objs.append(object)
-                        self.interact.append(3)
-                        self.new_map_pos.append((180,265))
-                    elif counter == 1 and self.map == 3:
-                        self.interactive_objs.append(object)
-                        self.interact.append(2)
-                        self.new_map_pos.append((1680,870))
+                    self.manage_interactives(interactive, object)
+    
+    def manage_interactives(self, interactive, object):
+        if interactive == 1 and self.map == 1:
+            self.interactive_objs.append(object)
+            self.interact.append(2)
+            self.new_map_pos.append((1680, 1660))
+        elif interactive == 1 and self.map == 2:
+            self.interactive_objs.append(object)
+            self.interact.append(1)
+            self.new_map_pos.append((3330, 260))
+        elif interactive == 2 and self.map == 2:
+            self.interactive_objs.append(object)
+            self.interact.append(3)
+            self.new_map_pos.append((180,265))
+        elif interactive == 1 and self.map == 3:
+            self.interactive_objs.append(object)
+            self.interact.append(2)
+            self.new_map_pos.append((1680,870))
+        elif interactive == 2 and self.map == 3:
+            self.interactive_objs.append(object)
+            self.interact.append(1)
+            self.new_map_pos.append((3180, 1300))
+        elif interactive == 2 and self.map == 1:
+            self.interactive_objs.append(object)
+            self.interact.append(3)
+            self.new_map_pos.append((1175, 280))
             
     def new_map(self, map, map_pos):
         timer = 1
@@ -280,7 +293,7 @@ class Game:
         self.create_chests()
 
     def map_chests(self):
-        self.map1chests = [[1035, 145, 0]]
+        self.map1chests = [[1035, 145, 0], [775, 1465, 0]]
 
     def create_chests(self):
         if self.map == 1:
@@ -313,7 +326,6 @@ class Game:
         for chest in self.interactive_chest_rect:
             index = self.interactive_chest_rect.index(chest)
             if self.map == 1:
-                print(index)
                 if self.map1chests[index][2] == 0:
                     self.check_chest_collision(chest)
     
@@ -337,7 +349,9 @@ class Game:
         text = self.font.render(f"COINS: {self.coins}", False, "black")
         self.screen.blit(text, (300, 10))         
         
-
+    def check_merchant_interaction(self):
+        if self.player.player.colliderect(self.merchant.collider()):
+            self.display_interaction()
     
 
     
