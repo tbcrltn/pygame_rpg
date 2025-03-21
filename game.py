@@ -45,12 +45,13 @@ class Game:
             self.tile_group.draw(self.screen)
             self.player.animate(self.player_dir)
             self.obj_group.draw(self.screen)
-            self.move()
             self.check_interactive_collision()
             self.draw_keys()
             self.draw_chests()
             self.display_keys_held()
             self.check_key_collision()
+            self.chest_collision()
+            self.move()
             pygame.time.Clock().tick(60)
             pygame.display.flip()
         pygame.quit()
@@ -102,29 +103,35 @@ class Game:
         for key in self.key_rect:
             key.x += self.dx
             key.y += self.dy
+        for chest in self.chest_rect:
+            chest.x += self.dx
+            chest.y += self.dy
         self.playerx += self.dx
         self.playery += self.dy
-        self.collision()
-    def collision(self):
         for collider in self.colliders:
             if self.player.player.colliderect(collider):
-                for tiles in self.tile_group:
-                    tiles.rect.x -= self.dx
-                    tiles.rect.y -= self.dy
-                for obj in self.obj_group:
-                    obj.rect.x -= self.dx
-                    obj.rect.y -= self.dy
-                for collider in self.colliders:
-                    collider.x -= self.dx
-                    collider.y -= self.dy
-                for collider in self.interactive_objs:
-                    collider.x -= self.dx
-                    collider.y -= self.dy
-                for key in self.key_rect:
-                    key.x -= self.dx
-                    key.y -= self.dy
-                self.playerx -= self.dx
-                self.playery-= self.dy
+                self.collision()
+    def collision(self):
+        for tiles in self.tile_group:
+            tiles.rect.x -= self.dx
+            tiles.rect.y -= self.dy
+        for obj in self.obj_group:
+            obj.rect.x -= self.dx
+            obj.rect.y -= self.dy
+        for collider in self.colliders:
+            collider.x -= self.dx
+            collider.y -= self.dy
+        for collider in self.interactive_objs:
+            collider.x -= self.dx
+            collider.y -= self.dy
+        for key in self.key_rect:
+            key.x -= self.dx
+            key.y -= self.dy
+        for chest in self.chest_rect:
+            chest.x -= self.dx
+            chest.y -= self.dy
+        self.playerx -= self.dx
+        self.playery-= self.dy
 
     def check_interaction(self):
         for box in self.interactive_objs:
@@ -283,7 +290,6 @@ class Game:
         dist_y = -self.playery - 300
         chest_rect = chest_image.get_rect(topleft = (x-dist_x, y-dist_y))
         self.chest_rect.append(chest_rect)
-        self.colliders.append(chest_rect)
 
     def draw_chests(self):
         for chest in self.chests:
@@ -295,7 +301,8 @@ class Game:
     def chest_collision(self):
         for chest in self.chest_rect:
             if self.player.player.colliderect(chest):
-                if self.player_keys > 0:
+                self.collision()
+                if self.player_keys >= 1:
                     self.display_interaction()
                     key = pygame.key.get_pressed()
                     if key[pygame.K_SPACE] or key[pygame.K_e]:
