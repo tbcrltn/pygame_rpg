@@ -103,9 +103,10 @@ class Game:
         for key in self.key_rect:
             key.x += self.dx
             key.y += self.dy
-        for chest in self.chest_rect:
-            chest.x += self.dx
-            chest.y += self.dy
+        for rect in self.interactive_chest_rect:
+            rect.x += self.dx
+            rect.y += self.dy
+   
         self.playerx += self.dx
         self.playery += self.dy
         for collider in self.colliders:
@@ -127,9 +128,9 @@ class Game:
         for key in self.key_rect:
             key.x -= self.dx
             key.y -= self.dy
-        for chest in self.chest_rect:
-            chest.x -= self.dx
-            chest.y -= self.dy
+        for rect in self.interactive_chest_rect:
+            rect.x -= self.dx
+            rect.y -= self.dy
         self.playerx -= self.dx
         self.playery-= self.dy
 
@@ -270,7 +271,9 @@ class Game:
 
     def load_chests(self):
         self.chests = []
+        self.interactive_chest_rect = []
         self.chest_rect = []
+        self.opened_chests = []
         self.chest_contents = []
         self.map_chests()
         self.create_chests()
@@ -281,15 +284,25 @@ class Game:
     def create_chests(self):
         if self.map == 1:
             for chest in self.map1chests:
-                self.new_chest(chest[0], chest[1])
+                if chest in self.opened_chests:
+                    self.new_chest(chest[0], chest[1], "open")
+                else:
+                    self.new_chest(chest[0], chest[1], "closed")
 
-    def new_chest(self, x, y):
-        chest_image = pygame.image.load("sprites/chest.png")
+    def new_chest(self, x, y, status):
+        if status == "closed":
+            chest_image = pygame.image.load("sprites/chest.png")
+        if status == "open":
+            chest_image = pygame.image.load("sprites/openchest.png")
         self.chests.append(chest_image)
         dist_x = -self.playerx - 300
         dist_y = -self.playery - 300
         chest_rect = chest_image.get_rect(topleft = (x-dist_x, y-dist_y))
+        interactive_rect = chest_image.get_rect(topleft = (x-dist_x, y-dist_y))
+        interactive_rect.height = 100
         self.chest_rect.append(chest_rect)
+        self.interactive_chest_rect.append(interactive_rect)
+        self.colliders.append(chest_rect)
 
     def draw_chests(self):
         for chest in self.chests:
@@ -299,17 +312,21 @@ class Game:
             self.screen.blit(chest, (x, y))
 
     def chest_collision(self):
-        for chest in self.chest_rect:
+        for chest in self.interactive_chest_rect:
             if self.player.player.colliderect(chest):
-                self.collision()
                 if self.player_keys >= 1:
                     self.display_interaction()
                     key = pygame.key.get_pressed()
                     if key[pygame.K_SPACE] or key[pygame.K_e]:
-                        self.open_chest()
+                        index = self.interactive_chest_rect.index(chest)
+                        opened = self.chests[index]
+                        self.open_chest(opened, index)
 
-    def open_chest(self):
+    def open_chest(self, chest, index):
         self.player_keys -= 1
+        self.opened_chests.append(chest)
+        self.chests[index] = pygame.image.load("sprites/openchest.png")
+
 
                 
         

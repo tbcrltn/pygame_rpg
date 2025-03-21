@@ -7,9 +7,9 @@ class Player:
         self.image = pygame.transform.scale(image, (45, 45))
         self.player = self.image.get_rect(topleft = (300, 300))
         self.screen = screen
-        self.timer = 10
+        self.timer = 100
         self.animation = 3
-        self.anim_speed = 8
+        self.anim_speed = 6
         self.moving = False
         
     def animate(self, dir):
