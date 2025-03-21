@@ -28,6 +28,8 @@ class Game:
         self.font_init()
         self.keys = []
         self.key_rect = []
+        self.map_keys()
+        self.load_chests()
         self.player_keys = 0
         self.load_map(self.start_x, self.start_y)
         self.create_keys()
@@ -46,6 +48,8 @@ class Game:
             self.move()
             self.check_interactive_collision()
             self.draw_keys()
+            self.draw_chests()
+            self.display_keys_held()
             self.check_key_collision()
             pygame.time.Clock().tick(60)
             pygame.display.flip()
@@ -100,7 +104,8 @@ class Game:
             key.y += self.dy
         self.playerx += self.dx
         self.playery += self.dy
-
+        self.collision()
+    def collision(self):
         for collider in self.colliders:
             if self.player.player.colliderect(collider):
                 for tiles in self.tile_group:
@@ -134,12 +139,7 @@ class Game:
             if self.player.player.colliderect(box):
                 self.display_interaction()
             
-                
-    def create_keys(self):
-        if self.map == 1:
-            self.new_key(160, 855)   
-        if self.map == 2:
-            self.new_key(1000, 850)    
+                   
         
     def load_map(self, x, y):
         self.start_y = y
@@ -201,7 +201,11 @@ class Game:
         self.load_map(player[0], player[1])
         self.keys = []
         self.key_rect = []
+        self.chests = []
+        self.chest_rect = []
+        self.chest_contents = []
         self.create_keys()
+        self.create_chests()
         time.sleep(timer)
     def font_init(self):
         pygame.font.init()
@@ -218,7 +222,9 @@ class Game:
     def new_key(self, x, y):
         key = gif_pygame.load("sprites/key.gif")
         self.keys.append(key)
-        key_rect = key.get_rect(center = (x, y))
+        dist_x = -self.playerx - 300
+        dist_y = -self.playery - 300
+        key_rect = key.get_rect(topleft = (x-dist_x, y-dist_y))
         self.key_rect.append(key_rect)
 
     def check_key_collision(self):
@@ -231,6 +237,77 @@ class Game:
         index = self.key_rect.index(key)
         self.keys.pop(index)
         self.key_rect.pop(index)
+        if self.map == 1:
+            self.map1keys.pop(index)
+        elif self.map == 2:
+            self.map2keys.pop(index)
+
+        
+
+    def display_keys_held(self):
+        text = self.font.render(f"KEYS: {self.player_keys}", False, "black")
+        self.screen.blit(text, (10, 10))
+
+    def create_keys(self):
+        if self.map == 1:
+            for key in self.map1keys:
+                self.new_key(key[0], key[1])   
+        if self.map == 2:
+            for key in self.map2keys:
+                self.new_key(key[0], key[1])
+
+    def map_keys(self):
+        self.map1keys = [(160, 855)]
+        self.map2keys = [(1000, 850)]
 
 
+    def load_chests(self):
+        self.chests = []
+        self.chest_rect = []
+        self.chest_contents = []
+        self.map_chests()
+        self.create_chests()
+
+    def map_chests(self):
+        self.map1chests = [(1035, 145)]
+
+    def create_chests(self):
+        if self.map == 1:
+            for chest in self.map1chests:
+                self.new_chest(chest[0], chest[1])
+
+    def new_chest(self, x, y):
+        chest_image = pygame.image.load("sprites/chest.png")
+        self.chests.append(chest_image)
+        dist_x = -self.playerx - 300
+        dist_y = -self.playery - 300
+        chest_rect = chest_image.get_rect(topleft = (x-dist_x, y-dist_y))
+        self.chest_rect.append(chest_rect)
+        self.colliders.append(chest_rect)
+
+    def draw_chests(self):
+        for chest in self.chests:
+            index = self.chests.index(chest)
+            x = self.chest_rect[index].x
+            y = self.chest_rect[index].y
+            self.screen.blit(chest, (x, y))
+
+    def chest_collision(self):
+        for chest in self.chest_rect:
+            if self.player.player.colliderect(chest):
+                if self.player_keys > 0:
+                    self.display_interaction()
+                    key = pygame.key.get_pressed()
+                    if key[pygame.K_SPACE] or key[pygame.K_e]:
+                        self.open_chest()
+
+    def open_chest(self):
+        self.player_keys -= 1
+
+                
+        
+
+    
+
+    
                     
