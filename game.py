@@ -28,18 +28,17 @@ class Game:
         self.font_init()
         self.keys = []
         self.key_rect = []
-        self.new_key(180, 870)
+        self.player_keys = 0
         self.load_map(self.start_x, self.start_y)
+        self.create_keys()
         print(self.interactive_objs)
 
 
     def run_game(self):
         pygame.init()
-        running = True
-        while running:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
+        self.running = True
+        while self.running:
+            self.check_events()
             print(f"Player @ {-self.playerx}, {-self.playery}")
             self.tile_group.draw(self.screen)
             self.player.animate(self.player_dir)
@@ -47,12 +46,16 @@ class Game:
             self.move()
             self.check_interactive_collision()
             self.draw_keys()
+            self.check_key_collision()
             pygame.time.Clock().tick(60)
             pygame.display.flip()
         pygame.quit()
 
     
-    
+    def check_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
     
     def move(self):
         self.dx, self.dy = 0,0
@@ -95,7 +98,8 @@ class Game:
         for key in self.key_rect:
             key.x += self.dx
             key.y += self.dy
-
+        self.playerx += self.dx
+        self.playery += self.dy
 
         for collider in self.colliders:
             if self.player.player.colliderect(collider):
@@ -116,8 +120,6 @@ class Game:
                     key.y -= self.dy
                 self.playerx -= self.dx
                 self.playery-= self.dy
-        self.playerx += self.dx
-        self.playery += self.dy
 
     def check_interaction(self):
         for box in self.interactive_objs:
@@ -133,14 +135,18 @@ class Game:
                 self.display_interaction()
             
                 
-
-                    
+    def create_keys(self):
+        if self.map == 1:
+            self.new_key(160, 855)   
+        if self.map == 2:
+            self.new_key(1000, 850)    
         
     def load_map(self, x, y):
         self.start_y = y
         self.start_x = x
         self.playerx = -x
         self.playery = -y
+        self.scale_factor = 50/32
         for layer in self.tmx_data.layers:
             if layer.name in ("GROUND", "GROUND2"):
                 for x, y, surf in layer.tiles():
@@ -152,15 +158,15 @@ class Game:
                     Tile(pos= pos, surface = surf, groups = self.obj_group)
             elif layer.name == "Collide":
                 for obj in layer:
-                    scale_factor = 50/32
-                    object = pygame.Rect(obj.x*scale_factor - self.start_x, obj.y*scale_factor - self.start_y, obj.width*scale_factor, obj.height*scale_factor)
+                    
+                    object = pygame.Rect(obj.x*self.scale_factor - self.start_x, obj.y*self.scale_factor - self.start_y, obj.width*self.scale_factor, obj.height*self.scale_factor)
                     self.colliders.append(object)
             elif layer.name == "Interactive":
                 counter = 0
                 for obj in layer:
                     counter += 1
-                    scale_factor = 50/32
-                    object = pygame.Rect(obj.x*scale_factor - self.start_x, obj.y*scale_factor - self.start_y, obj.width*scale_factor, obj.height*scale_factor)
+                    
+                    object = pygame.Rect(obj.x*self.scale_factor - self.start_x, obj.y*self.scale_factor - self.start_y, obj.width*self.scale_factor, obj.height*self.scale_factor)
                     if counter == 1 and self.map == 1:
                         self.interactive_objs.append(object)
                         self.interact.append(2)
@@ -193,6 +199,9 @@ class Game:
         self.new_map_pos = []
         self.colliders = []
         self.load_map(player[0], player[1])
+        self.keys = []
+        self.key_rect = []
+        self.create_keys()
         time.sleep(timer)
     def font_init(self):
         pygame.font.init()
@@ -211,4 +220,17 @@ class Game:
         self.keys.append(key)
         key_rect = key.get_rect(center = (x, y))
         self.key_rect.append(key_rect)
+
+    def check_key_collision(self):
+        for key in self.key_rect:
+            if self.player.player.colliderect(key):
+                self.player_keys += 1
+                self.destroy_key(key)
+
+    def destroy_key(self, key):
+        index = self.key_rect.index(key)
+        self.keys.pop(index)
+        self.key_rect.pop(index)
+
+
                     
