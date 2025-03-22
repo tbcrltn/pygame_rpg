@@ -33,9 +33,11 @@ class Game:
         self.map_keys()
         self.load_chests()
         self.player_keys = 0
+        self.merchant = Merchant(315, 2170, self.screen, self.map)
         self.load_map(self.start_x, self.start_y)
         self.create_keys()
-        self.merchant = Merchant(315, 2170, self.screen, self.map, self.colliders)
+        
+        
 
 
     def run_game(self):
@@ -43,7 +45,7 @@ class Game:
         self.running = True
         while self.running:
             self.check_events()
-            print(f"Player @ {-self.playerx}, {-self.playery}")
+            #print(f"Player @ {-self.playerx}, {-self.playery}")
             self.tile_group.draw(self.screen)
             self.player.animate(self.player_dir)
             self.obj_group.draw(self.screen)
@@ -56,6 +58,7 @@ class Game:
             self.check_key_collision()
             self.chest_collision()
             self.check_merchant_interaction()
+            self.check_merchant_collision()
             self.move()
             pygame.time.Clock().tick(60)
             pygame.display.flip()
@@ -174,6 +177,8 @@ class Game:
                     
                     object = pygame.Rect(obj.x*self.scale_factor - self.start_x, obj.y*self.scale_factor - self.start_y, obj.width*self.scale_factor, obj.height*self.scale_factor)
                     self.colliders.append(object)
+
+                    
             elif layer.name == "Interactive":
                 interactive = 0
                 for obj in layer:
@@ -350,8 +355,14 @@ class Game:
         self.screen.blit(text, (300, 10))         
         
     def check_merchant_interaction(self):
-        if self.player.player.colliderect(self.merchant.collider()):
+        if self.player.player.colliderect(self.merchant.interactive_collider()):
             self.display_interaction()
+
+    def check_merchant_collision(self):
+        if self.map == 1:
+            collider = self.merchant.collider()
+            if self.player.player.colliderect(collider):
+                self.collision()
     
 
     
