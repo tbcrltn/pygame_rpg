@@ -359,7 +359,7 @@ class Game:
             self.display_interaction()
             keys = pygame.key.get_pressed()
             if keys[pygame.K_SPACE] or keys[pygame.K_e]:
-                print("interacted")
+                self.display_merchant_screen()
 
     def check_merchant_collision(self):
         if self.map == 1:
@@ -367,6 +367,17 @@ class Game:
             if self.player.player.colliderect(collider):
                 self.collision()
 
+    def display_merchant_screen(self):
+        screen_up = True
+        while screen_up:
+            self.check_events()
+            pygame.draw.rect(self.screen, "black",(0, 0, 700, 700))
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_ESCAPE]:
+                screen_up = False
+
+
+            pygame.display.flip()
     
 
     
