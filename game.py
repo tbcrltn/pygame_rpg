@@ -23,8 +23,8 @@ class Game:
         self.tmx_data = load_pygame("maps/map1.tmx")
         self.dx = 0
         self.dy = 0
-        self.start_x = 300
-        self.start_y = 300
+        self.start_x = 400
+        self.start_y = 2170
         self.playerx = -self.start_x
         self.playery = -self.start_y
         self.font_init()
@@ -357,12 +357,16 @@ class Game:
     def check_merchant_interaction(self):
         if self.player.player.colliderect(self.merchant.interactive_collider()):
             self.display_interaction()
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_SPACE] or keys[pygame.K_e]:
+                print("interacted")
 
     def check_merchant_collision(self):
         if self.map == 1:
             collider = self.merchant.collider()
             if self.player.player.colliderect(collider):
                 self.collision()
+
     
 
     
