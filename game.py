@@ -89,7 +89,7 @@ class Game:
             self.player_dir = "right"
             self.dx = -self.player_speed
             self.player.moving = True
-        elif keys[pygame.K_SPACE] or keys[pygame.K_e]:
+        elif keys[pygame.K_e]:
             self.check_interaction()
         else:
             self.player.moving = False
@@ -238,7 +238,7 @@ class Game:
     def font_init(self):
         pygame.font.init()
         self.font = pygame.font.Font("fonts/pixel.ttf", 20)
-        self.text = self.font.render("INTERACT [SPACE] OR [E]", False, "black")
+        self.text = self.font.render("INTERACT [E]", False, "black")
     def display_interaction(self):
         
         self.screen.blit(self.text, (20, 680))
@@ -339,7 +339,7 @@ class Game:
             if self.player_keys >= 1:
                 self.display_interaction()
                 key = pygame.key.get_pressed()
-                if key[pygame.K_SPACE] or key[pygame.K_e]:
+                if key[pygame.K_e]:
                     index = self.interactive_chest_rect.index(chest)
                     self.open_chest(index)
 
@@ -358,7 +358,7 @@ class Game:
         if self.player.player.colliderect(self.merchant.interactive_collider()):
             self.display_interaction()
             keys = pygame.key.get_pressed()
-            if keys[pygame.K_SPACE] or keys[pygame.K_e]:
+            if keys[pygame.K_e]:
                 self.display_merchant_screen()
 
     def check_merchant_collision(self):
@@ -369,15 +369,29 @@ class Game:
 
     def display_merchant_screen(self):
         screen_up = True
+        menu_screen = pygame.Surface((700, 700), pygame.SRCALPHA)
+        menu_screen.fill((0, 0, 0, 190))
         while screen_up:
+            quit_text = self.font.render("CLOSE [ESC]", False, (255, 255, 255))
+            menu_screen.blit(quit_text, (560, 10))
             self.check_events()
-            pygame.draw.rect(self.screen, "black",(0, 0, 700, 700))
+            self.draw_screen()
+            self.screen.blit(menu_screen, (0, 0))
             keys = pygame.key.get_pressed()
             if keys[pygame.K_ESCAPE]:
                 screen_up = False
 
 
             pygame.display.flip()
+
+
+    def draw_screen(self):
+        self.tile_group.draw(self.screen)
+        self.player.animate(self.player_dir)
+        self.obj_group.draw(self.screen)
+        self.draw_keys()
+        self.draw_chests()
+        self.merchant.draw(self.playerx, self.playery)
     
 
     
