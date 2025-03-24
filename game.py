@@ -20,6 +20,8 @@ class Game:
         self.interact = []
         self.new_map_pos = []
         self.map = 1
+        self.pistol = False
+        self.shotgun = False
         self.tmx_data = load_pygame("maps/map1.tmx")
         self.dx = 0
         self.dy = 0
@@ -59,6 +61,8 @@ class Game:
             self.chest_collision()
             self.check_merchant_interaction()
             self.check_merchant_collision()
+            self.shoot_pistol()
+            self.shoot_shotgun()
             self.move()
             pygame.time.Clock().tick(60)
             pygame.display.flip()
@@ -370,18 +374,32 @@ class Game:
     def display_merchant_screen(self):
         screen_up = True
         menu_screen = pygame.Surface((700, 700), pygame.SRCALPHA)
-        menu_screen.fill((0, 0, 0, 190))
+        num = 1
+        self.funds_timer = 100
         while screen_up:
+            keys = pygame.key.get_pressed()
+            menu_screen.fill((0, 0, 0, 190))
             quit_text = self.font.render("CLOSE [ESC]", False, (255, 255, 255))
             menu_screen.blit(quit_text, (560, 10))
+            select_text = self.font.render("SELECT [ENTER]", False, (255, 255, 255))
+            menu_screen.blit(select_text, (20, 10))
+
+            self.buy_options(num, menu_screen, keys)
+            
+            
             self.check_events()
             self.draw_screen()
             self.screen.blit(menu_screen, (0, 0))
-            keys = pygame.key.get_pressed()
             if keys[pygame.K_ESCAPE]:
                 screen_up = False
+            if keys[pygame.K_UP]:
+                if not num == 1:
+                    num -= 1
+            if keys[pygame.K_DOWN]:
+                if not num == 2 :
+                    num +=1
 
-
+            pygame.time.Clock().tick(60)
             pygame.display.flip()
 
 
@@ -393,6 +411,45 @@ class Game:
         self.draw_chests()
         self.merchant.draw(self.playerx, self.playery)
     
+    def buy_options(self, num, menu_screen, keys):
+        
+        if self.funds_timer < 100:
+            text = self.font.render("INSUFFICIENT FUNDS", False, (255, 255, 255))
+            menu_screen.blit(text, (250, 680))
+            self.funds_timer += 1
 
-    
-                    
+
+        font = pygame.font.Font("fonts/pixel.ttf", 30)
+        if num == 1:
+            pistol = font.render("PISTOL ------------------------ 25 COINS", False, (0, 0, 0), bgcolor=(255, 255, 255))
+            shotgun = font.render("SHOTGUN --------------------- 50 COINS", False, (255, 255, 255))
+            if keys[pygame.K_RETURN]:
+                if self.coins >= 25:
+                    self.coins -= 25
+                    self.pistol = True
+                    self.shotgun = False
+                else:
+                    self.funds_timer = 0
+        elif num == 2:
+            pistol = font.render("PISTOL ------------------------ 25 COINS", False, (255, 255, 255))
+            shotgun = font.render("SHOTGUN --------------------- 50 COINS", False, (0, 0, 0), bgcolor=(255, 255, 255))
+            if keys[pygame.K_RETURN]:
+                if self.coins >= 50:
+                    self.coins -= 50
+                    self.pistol = False
+                    self.shotgun = True
+                else:
+                    self.funds_timer = 0
+
+
+
+        menu_screen.blit(pistol, (20, 100))
+        menu_screen.blit(shotgun, (20, 200))
+
+    def shoot_pistol(self):
+        if self.pistol == True:
+            pass
+
+    def shoot_shotgun(self):
+        if self.shotgun == True:
+            pass              
