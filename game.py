@@ -14,7 +14,7 @@ class Game:
         self.player = Player(self.screen)
         self.player_dir = "down"
         self.player_speed = 5
-        self.coins = 50
+        self.coins = 0
         self.tile_group = pygame.sprite.Group()
         self.obj_group = pygame.sprite.Group()
         self.colliders = []
@@ -53,7 +53,7 @@ class Game:
         self.running = True
         while self.running:
             self.check_events()
-            #print(f"Player @ {-self.playerx}, {-self.playery}")
+            print(f"Player @ {-self.playerx}, {-self.playery}")
             self.tile_group.draw(self.screen)
             self.pistolobj.draw()
             self.shotgunobj.draw()
@@ -293,13 +293,17 @@ class Game:
         if self.map == 1:
             for key in self.map1keys:
                 self.new_key(key[0], key[1])   
-        if self.map == 2:
+        elif self.map == 2:
             for key in self.map2keys:
+                self.new_key(key[0], key[1])
+        elif self.map == 3:
+            for key in self.map3keys:
                 self.new_key(key[0], key[1])
 
     def map_keys(self):
         self.map1keys = [(160, 855)]
         self.map2keys = [(1000, 850)]
+        self.map3keys = [(740, 690)]
 
 
     def load_chests(self):
@@ -312,10 +316,14 @@ class Game:
 
     def map_chests(self):
         self.map1chests = [[1035, 145, 0], [775, 1465, 0]]
+        self.map3chests = [[185, 1100, 0]]
 
     def create_chests(self):
         if self.map == 1:
             for chest in self.map1chests:
+                self.new_chest(chest[0], chest[1], chest[2])
+        if self.map == 3:
+            for chest in self.map3chests:
                 self.new_chest(chest[0], chest[1], chest[2])
 
     def new_chest(self, x, y, status):
@@ -346,6 +354,9 @@ class Game:
             if self.map == 1:
                 if self.map1chests[index][2] == 0:
                     self.check_chest_collision(chest)
+            if self.map == 3:
+                if self.map3chests[index][2] == 0:
+                    self.check_chest_collision(chest)
     
     def check_chest_collision(self, chest):
         if self.player.player.colliderect(chest):
@@ -360,8 +371,10 @@ class Game:
         self.player_keys -= 1
         if self.map == 1:
             self.map1chests[index][2] = 1
+        if self.map == 3:
+            self.map3chests[index][2] = 1
         self.chests[index] = pygame.image.load("sprites/openchest.png")
-        self.coins += 5
+        self.coins += 10
                 
     def display_money(self):
         text = self.font.render(f"COINS: {self.coins}", False, "black")
