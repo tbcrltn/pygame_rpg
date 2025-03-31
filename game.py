@@ -6,6 +6,7 @@ import time
 import gif_pygame
 from merchant import Merchant
 from pistol import Pistol
+from shotgun import Shotgun
 
 class Game:
     def __init__(self):
@@ -13,7 +14,7 @@ class Game:
         self.player = Player(self.screen)
         self.player_dir = "down"
         self.player_speed = 5
-        self.coins = 25
+        self.coins = 50
         self.tile_group = pygame.sprite.Group()
         self.obj_group = pygame.sprite.Group()
         self.colliders = []
@@ -26,8 +27,8 @@ class Game:
         self.tmx_data = load_pygame("maps/map1.tmx")
         self.dx = 0
         self.dy = 0
-        self.start_x = 400
-        self.start_y = 2170
+        self.start_x = 300
+        self.start_y = 300
         self.playerx = -self.start_x
         self.playery = -self.start_y
         self.font_init()
@@ -38,6 +39,7 @@ class Game:
         self.player_keys = 0
         self.merchant = Merchant(315, 2170, self.screen, self.map)
         self.pistolobj = Pistol(self.player, self.screen)
+        self.shotgunobj = Shotgun(self.player, self.screen)
         self.shooting_timer = 100
         self.purchased_timer = 100
         self.load_map(self.start_x, self.start_y)
@@ -54,6 +56,7 @@ class Game:
             #print(f"Player @ {-self.playerx}, {-self.playery}")
             self.tile_group.draw(self.screen)
             self.pistolobj.draw()
+            self.shotgunobj.draw()
             self.player.animate(self.player_dir)
             self.obj_group.draw(self.screen)
             self.check_interactive_collision()
@@ -472,12 +475,25 @@ class Game:
 
     def shoot_shotgun(self):
         if self.shotgun == True:
-            pass
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_SPACE]:
+                if self.shooting_timer > 5:
+                    self.shotgunobj.shoot(self.player_dir)
+                    self.shooting_timer = 0
+            else:
+                self.shooting_timer += 1
 
 
     def bullet_collision(self):
-        for bullet in self.pistolobj.bullets:
-            for collider in self.colliders:
-                if bullet.colliderect(collider):
-                    self.pistolobj.destroy(bullet)
+        
+        if self.pistol:
+            for bullet in self.pistolobj.bullets:
+                for collider in self.colliders:
+                    if bullet.colliderect(collider):
+                        self.pistolobj.destroy(bullet)
+        elif self.shotgun:
+            for bullet in self.shotgunobj.bullets:
+                for collider in self.colliders:
+                    if bullet.colliderect(collider):
+                        self.shotgunobj.destroy(bullet)
 

@@ -6,7 +6,6 @@ class Pistol:
         self.bullets = []
         self.bulletdx = []
         self.bulletdy = []
-        self.shoot_timer = 40
         self.player = player
         self.screen = screen
         self.speed = 10
@@ -15,7 +14,7 @@ class Pistol:
 
     def draw(self):
         for bullet in self.bullets:
-            pygame.draw.rect(self.screen, "red", bullet)
+            pygame.draw.rect(self.screen, "blue", bullet)
             index = self.bullets.index(bullet)
             dx = self.bulletdx[index]
             dy = self.bulletdy[index]
@@ -44,8 +43,10 @@ class Pistol:
         self.bullets.append(pygame.Rect(325, 325, 5, 5))
 
     def destroy(self, bullet):
-        index = self.bullets.index(bullet)
-        self.bullets.pop(index)
-        self.bulletdx.pop(index)
-        self.bulletdy.pop(index)
+        try:
+            index = self.bullets.index(bullet)
+            self.bullets.pop(index)
+            self.bulletdx.pop(index)
+            self.bulletdy.pop(index)
+        except: pass
     
