@@ -225,6 +225,22 @@ class Game:
             self.interactive_objs.append(object)
             self.interact.append(3)
             self.new_map_pos.append((1175, 280))
+        elif interactive == 3 and self.map == 1:
+            self.interactive_objs.append(object)
+            self.interact.append(4)
+            self.new_map_pos.append((226, 321))
+        elif interactive == 1 and self.map == 4:
+            self.interactive_objs.append(object)
+            self.interact.append(1)
+            self.new_map_pos.append((2230,2125))
+        elif interactive == 2 and self.map == 4:
+            self.interactive_objs.append(object)
+            self.interact.append(2)
+            self.new_map_pos.append((430, 525))
+        elif interactive == 3 and self.map == 2:
+            self.interactive_objs.append(object)
+            self.interact.append(4)
+            self.new_map_pos.append((3176, 316))
             
     def new_map(self, map, map_pos):
         timer = 1
