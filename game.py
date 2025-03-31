@@ -5,6 +5,7 @@ from pytmx.util_pygame import load_pygame
 import time
 import gif_pygame
 from merchant import Merchant
+from pistol import Pistol
 
 class Game:
     def __init__(self):
@@ -12,7 +13,7 @@ class Game:
         self.player = Player(self.screen)
         self.player_dir = "down"
         self.player_speed = 5
-        self.coins = 0
+        self.coins = 25
         self.tile_group = pygame.sprite.Group()
         self.obj_group = pygame.sprite.Group()
         self.colliders = []
@@ -36,6 +37,9 @@ class Game:
         self.load_chests()
         self.player_keys = 0
         self.merchant = Merchant(315, 2170, self.screen, self.map)
+        self.pistolobj = Pistol(self.player, self.screen)
+        self.shooting_timer = 100
+        self.purchased_timer = 100
         self.load_map(self.start_x, self.start_y)
         self.create_keys()
         
@@ -49,6 +53,7 @@ class Game:
             self.check_events()
             #print(f"Player @ {-self.playerx}, {-self.playery}")
             self.tile_group.draw(self.screen)
+            self.pistolobj.draw()
             self.player.animate(self.player_dir)
             self.obj_group.draw(self.screen)
             self.check_interactive_collision()
@@ -63,6 +68,7 @@ class Game:
             self.check_merchant_collision()
             self.shoot_pistol()
             self.shoot_shotgun()
+            self.bullet_collision()
             self.move()
             pygame.time.Clock().tick(60)
             pygame.display.flip()
@@ -402,7 +408,6 @@ class Game:
             pygame.time.Clock().tick(60)
             pygame.display.flip()
 
-
     def draw_screen(self):
         self.tile_group.draw(self.screen)
         self.player.animate(self.player_dir)
@@ -417,6 +422,11 @@ class Game:
             text = self.font.render("INSUFFICIENT FUNDS", False, (255, 255, 255))
             menu_screen.blit(text, (250, 680))
             self.funds_timer += 1
+        
+        if self.purchased_timer < 100:
+            text = self.font.render("PURCHASED SUCCESSFULLY", False, (255, 255, 255))
+            menu_screen.blit(text, (200, 680))
+            self.purchased_timer += 1
 
 
         font = pygame.font.Font("fonts/pixel.ttf", 30)
@@ -428,6 +438,8 @@ class Game:
                     self.coins -= 25
                     self.pistol = True
                     self.shotgun = False
+                    time.sleep(0.5)
+                    self.purchased_timer = 0
                 else:
                     self.funds_timer = 0
         elif num == 2:
@@ -438,6 +450,8 @@ class Game:
                     self.coins -= 50
                     self.pistol = False
                     self.shotgun = True
+                    time.sleep(0.5)
+                    self.purchased_timer = 0
                 else:
                     self.funds_timer = 0
 
@@ -448,8 +462,22 @@ class Game:
 
     def shoot_pistol(self):
         if self.pistol == True:
-            pass
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_SPACE]:
+                if self.shooting_timer > 5:
+                    self.pistolobj.shoot(self.player_dir)
+                    self.shooting_timer = 0
+            else:
+                self.shooting_timer += 1
 
     def shoot_shotgun(self):
         if self.shotgun == True:
-            pass              
+            pass
+
+
+    def bullet_collision(self):
+        for bullet in self.pistolobj.bullets:
+            for collider in self.colliders:
+                if bullet.colliderect(collider):
+                    self.pistolobj.destroy(bullet)
+
