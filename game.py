@@ -14,7 +14,7 @@ class Game:
         self.player = Player(self.screen)
         self.player_dir = "down"
         self.player_speed = 5
-        self.coins = 0
+        self.coins = 100
         self.tile_group = pygame.sprite.Group()
         self.obj_group = pygame.sprite.Group()
         self.colliders = []
@@ -24,11 +24,12 @@ class Game:
         self.map = 1
         self.pistol = False
         self.shotgun = False
+        self.magic = False
         self.tmx_data = load_pygame("maps/map1.tmx")
         self.dx = 0
         self.dy = 0
-        self.start_x = 300
-        self.start_y = 300
+        self.start_x = 400
+        self.start_y = 2170
         self.playerx = -self.start_x
         self.playery = -self.start_y
         self.font_init()
@@ -42,6 +43,8 @@ class Game:
         self.shotgunobj = Shotgun(self.player, self.screen)
         self.shooting_timer = 100
         self.purchased_timer = 100
+        self.shotgunowned = False
+        self.pistolowned = False
         self.load_map(self.start_x, self.start_y)
         self.create_keys()
         
@@ -71,6 +74,7 @@ class Game:
             self.check_merchant_collision()
             self.shoot_pistol()
             self.shoot_shotgun()
+            self.use_magic()
             self.bullet_collision()
             self.move()
             pygame.time.Clock().tick(60)
@@ -167,8 +171,7 @@ class Game:
         for box in self.interactive_objs:
             if self.player.player.colliderect(box):
                 self.display_interaction()
-            
-                   
+                     
         
     def load_map(self, x, y):
         self.start_y = y
@@ -298,6 +301,8 @@ class Game:
             self.map1keys.pop(index)
         elif self.map == 2:
             self.map2keys.pop(index)
+        elif self.map == 3:
+            self.map3keys.pop(index)
 
         
 
@@ -318,7 +323,7 @@ class Game:
 
     def map_keys(self):
         self.map1keys = [(160, 855)]
-        self.map2keys = [(1000, 850)]
+        self.map2keys = [(1000, 850), (210, 1195)]
         self.map3keys = [(740, 690)]
 
 
@@ -331,7 +336,7 @@ class Game:
         self.create_chests()
 
     def map_chests(self):
-        self.map1chests = [[1035, 145, 0], [775, 1465, 0]]
+        self.map1chests = [[1035, 145, 0], [775, 1465, 0], [1010, 640, 0]]
         self.map3chests = [[185, 1100, 0]]
 
     def create_chests(self):
@@ -421,7 +426,6 @@ class Game:
             menu_screen.blit(quit_text, (560, 10))
             select_text = self.font.render("SELECT [ENTER]", False, (255, 255, 255))
             menu_screen.blit(select_text, (20, 10))
-
             self.buy_options(num, menu_screen, keys)
             
             
@@ -434,10 +438,10 @@ class Game:
                 if not num == 1:
                     num -= 1
             if keys[pygame.K_DOWN]:
-                if not num == 2 :
+                if not num == 3:
                     num +=1
 
-            pygame.time.Clock().tick(60)
+            pygame.time.Clock().tick(13)
             pygame.display.flip()
 
     def draw_screen(self):
@@ -465,11 +469,13 @@ class Game:
         if num == 1:
             pistol = font.render("PISTOL ------------------------ 25 COINS", False, (0, 0, 0), bgcolor=(255, 255, 255))
             shotgun = font.render("SHOTGUN --------------------- 50 COINS", False, (255, 255, 255))
+            magic = font.render("MAGIC --------------------- 100 COINS", False, (255, 255, 255))
             if keys[pygame.K_RETURN]:
                 if self.coins >= 25:
                     self.coins -= 25
                     self.pistol = True
                     self.shotgun = False
+                    self.magic = False
                     time.sleep(0.5)
                     self.purchased_timer = 0
                 else:
@@ -477,20 +483,33 @@ class Game:
         elif num == 2:
             pistol = font.render("PISTOL ------------------------ 25 COINS", False, (255, 255, 255))
             shotgun = font.render("SHOTGUN --------------------- 50 COINS", False, (0, 0, 0), bgcolor=(255, 255, 255))
+            magic = font.render("MAGIC --------------------- 100 COINS", False, (255, 255, 255))
             if keys[pygame.K_RETURN]:
                 if self.coins >= 50:
                     self.coins -= 50
                     self.pistol = False
                     self.shotgun = True
+                    self.magic = False
                     time.sleep(0.5)
                     self.purchased_timer = 0
                 else:
                     self.funds_timer = 0
+        elif num == 3:
+            pistol = font.render("PISTOL ------------------------ 25 COINS", False, (255, 255, 255))
+            shotgun = font.render("SHOTGUN --------------------- 50 COINS", False, (255, 255, 255))
+            magic = font.render("MAGIC --------------------- 100 COINS", False, (0, 0, 0), bgcolor = (255, 255, 255))
+            if keys[pygame.K_RETURN]:
+                if self.coins >= 100:
+                    self.coins -= 100
+                    self.magic = True
+                    self.shotgun = False
+                    self.pistol = False
 
 
 
         menu_screen.blit(pistol, (20, 100))
         menu_screen.blit(shotgun, (20, 200))
+        menu_screen.blit(magic, (20, 300))
 
     def shoot_pistol(self):
         if self.pistol == True:
@@ -512,6 +531,9 @@ class Game:
             else:
                 self.shooting_timer += 1
 
+    def use_magic(self):
+        if self.magic:
+            print("magic turned on")
 
     def bullet_collision(self):
         
@@ -525,4 +547,3 @@ class Game:
                 for collider in self.colliders:
                     if bullet.colliderect(collider):
                         self.shotgunobj.destroy(bullet)
-
