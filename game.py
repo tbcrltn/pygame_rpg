@@ -7,6 +7,7 @@ import gif_pygame
 from merchant import Merchant
 from pistol import Pistol
 from shotgun import Shotgun
+from magic import Magic
 
 class Game:
     def __init__(self):
@@ -41,6 +42,7 @@ class Game:
         self.merchant = Merchant(315, 2170, self.screen, self.map)
         self.pistolobj = Pistol(self.player, self.screen)
         self.shotgunobj = Shotgun(self.player, self.screen)
+        self.magicobj = Magic(self.player, self.screen)
         self.shooting_timer = 100
         self.purchased_timer = 100
         self.shotgunowned = False
@@ -60,6 +62,7 @@ class Game:
             self.tile_group.draw(self.screen)
             self.pistolobj.draw()
             self.shotgunobj.draw()
+            self.magicobj.draw()
             self.player.animate(self.player_dir)
             self.obj_group.draw(self.screen)
             self.check_interactive_collision()
@@ -533,7 +536,13 @@ class Game:
 
     def use_magic(self):
         if self.magic:
-            print("magic turned on")
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_SPACE]:
+                if self.shooting_timer > 5:
+                    self.magicobj.shoot(self.player_dir)
+                    self.shooting_timer = 0
+            else:
+                self.shooting_timer += 1
 
     def bullet_collision(self):
         
