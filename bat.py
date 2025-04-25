@@ -12,6 +12,7 @@ class Bat:
         self.screen = screen
         self.bat = self.image.get_rect(center = (self.x, self.y))
         self.speed = 1.7
+        self.health = 3
 
 
     def animate(self):
@@ -35,6 +36,7 @@ class Bat:
             dx, dy = self.target(self.x, self.y, self.player.player.centerx, self.player.player.centery)
             self.x += dx * self.speed
             self.y += dy * self.speed
+
     def target(self, start_x, start_y, target_x, target_y):
         dist_x = target_x - start_x
         dist_y = target_y - start_y
@@ -43,5 +45,7 @@ class Bat:
             dx = dist_x/distance
             dy = dist_y/distance
         return dx, dy
+
+   
 
         

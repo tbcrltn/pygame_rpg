@@ -17,6 +17,7 @@ class Game:
         self.player_dir = "down"
         self.player_speed = 5
         self.coins = 5
+        self.health = 5
         self.init_tiles()
         self.dx = 0
         self.dy = 0
@@ -60,6 +61,7 @@ class Game:
             self.chest_collision()
             self.check_merchant_interaction()
             self.check_merchant_collision()
+            self.check_bat_collision()
             self.shoot_pistol()
             self.shoot_shotgun()
             self.use_magic()
@@ -82,7 +84,7 @@ class Game:
 
         self.pistol = False
         self.shotgun = False
-        self.magic = False
+        self.magic = True
         self.merchant = Merchant(315, 2170, self.screen, self.map)
         self.pistolobj = Pistol(self.player, self.screen)
         self.shotgunobj = Shotgun(self.player, self.screen)
@@ -620,3 +622,40 @@ class Game:
             bat.track()
             bat.x += dx
             bat.y += dy
+
+
+    def check_bat_collision(self):
+        for bat in self.bats:
+            if self.player.player.colliderect(bat.bat):
+                self.health -= 1
+
+            if self.pistol:
+                for bullet in self.pistolobj.bullets:
+                    if bullet.colliderect(bat.bat):
+                        bat.health -= 1
+                        index = self.pistolobj.bullets.index(bullet)
+                        self.pistolobj.bullets.pop(index)
+                        self.pistolobj.bulletdx.pop(index)
+                        self.pistolobj.bulletdy.pop(index)
+            elif self.shotgun:
+                for bullet in self.shotgunobj.bullets:
+                    if bullet.colliderect(bat.bat):
+                        bat.health -= 1
+                        index = self.shotgunobj.bullets.index(bullet)
+                        self.shotgunobj.bullets.pop(index)
+                        self.shotgunobj.bulletdx.pop(index)
+                        self.shotgunobj.bulletdy.pop(index)
+            elif self.magic:
+                for bullet in self.magicobj.bullets:
+                    if bullet.colliderect(bat.bat):
+                        bat.health -= 1
+                        index = self.magicobj.bullets.index(bullet)
+                        self.magicobj.bullets.pop(index)
+                        self.magicobj.bulletdx.pop(index)
+                        self.magicobj.bulletdy.pop(index)
+            
+            if bat.health <= 0:
+                index = self.bats.index(bat)
+                self.bats.pop(index)
+
+
