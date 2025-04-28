@@ -44,7 +44,7 @@ class Game:
         self.running = True
         while self.running:
             self.check_events()
-            #print(f"Player @ {-self.playerx}, {-self.playery}")
+            print(f"Player @ {-self.playerx}, {-self.playery}")
             self.tile_group.draw(self.screen)
             self.pistolobj.draw()
             self.shotgunobj.draw()
@@ -57,6 +57,7 @@ class Game:
             self.magicobj.draw()
             self.display_keys_held()
             self.display_money()
+            self.display_health()
             self.check_key_collision()
             self.chest_collision()
             self.check_merchant_interaction()
@@ -67,6 +68,7 @@ class Game:
             self.use_magic()
             self.bullet_collision()
             self.move()
+            self.health = round(self.health)
             pygame.time.Clock().tick(60)
             pygame.display.flip()
         pygame.quit()
@@ -99,6 +101,7 @@ class Game:
     def init_enemies(self):
         self.bats = []
         self.new_bat(1605, 345)
+        self.new_bat(2515, 795)
 
 
     def check_events(self):
@@ -190,7 +193,7 @@ class Game:
                 self.map = self.interact[self.interactive_objs.index(box)]
                 map_pos = self.interactive_objs.index(box)
                 print(self.map)
-                self.new_map(self.map, map_pos)
+                self.new_map(self.map, map_pos = map_pos)
     def check_interactive_collision(self):
         for box in self.interactive_objs:
             if self.player.player.colliderect(box):
@@ -230,6 +233,13 @@ class Game:
     def load_enemies(self):
         if self.map == 1:
             self.new_bat(1605, 345)
+            self.new_bat(2515, 795)
+        elif self.map == 2:
+            self.new_bat(1305, 1075)
+        elif self.map == 4:
+            self.new_bat(2386, 431)
+            self.new_bat(1596, 396)
+            self.new_bat(731, 336)
     
     def manage_interactives(self, interactive, object):
         if interactive == 1 and self.map == 1:
@@ -273,12 +283,15 @@ class Game:
             self.interact.append(4)
             self.new_map_pos.append((3176, 316))
             
-    def new_map(self, map, map_pos):
+    def new_map(self, map, map_pos = None):
         timer = 1
         self.player_dir = "down"
         map = str(map)
         self.tmx_data = load_pygame(f"maps/map{map}.tmx")
-        player = self.new_map_pos[map_pos]
+        if map_pos == None:
+            player = (300, 300)
+        else:
+            player = self.new_map_pos[map_pos]
         print(player)
         self.obj_group.empty()
         self.tile_group.empty()
@@ -292,6 +305,8 @@ class Game:
         self.chests = []
         self.chest_rect = []
         self.interactive_chest_rect = []
+        for bat in self.bats:
+            del bat
         self.bats = []
         self.create_keys()
         self.create_chests()
@@ -300,7 +315,7 @@ class Game:
     def font_init(self):
         pygame.font.init()
         self.font = pygame.font.Font("fonts/pixel.ttf", 20)
-        self.text = self.font.render("INTERACT [E]", False, "black")
+        self.text = self.font.render("INTERACT [E]", False, (255, 255, 255), bgcolor=(0, 0, 0))
     def display_interaction(self):
         
         self.screen.blit(self.text, (20, 680))
@@ -337,7 +352,7 @@ class Game:
         
 
     def display_keys_held(self):
-        text = self.font.render(f"KEYS: {self.player_keys}", False, "black")
+        text = self.font.render(f"KEYS: {self.player_keys}", False, (255, 255, 255), bgcolor=(0, 0, 0))
         self.screen.blit(text, (10, 10))
 
     def create_keys(self):
@@ -368,6 +383,7 @@ class Game:
     def map_chests(self):
         self.map1chests = [[1035, 145, 0], [775, 1465, 0], [1010, 640, 0]]
         self.map3chests = [[185, 1100, 0]]
+        self.map2chests = [[800, 840, 0]]
 
     def create_chests(self):
         if self.map == 1:
@@ -375,6 +391,9 @@ class Game:
                 self.new_chest(chest[0], chest[1], chest[2])
         if self.map == 3:
             for chest in self.map3chests:
+                self.new_chest(chest[0], chest[1], chest[2])
+        if self.map == 2:
+            for chest in self.map2chests:
                 self.new_chest(chest[0], chest[1], chest[2])
 
     def new_chest(self, x, y, status):
@@ -405,8 +424,11 @@ class Game:
             if self.map == 1:
                 if self.map1chests[index][2] == 0:
                     self.check_chest_collision(chest)
-            if self.map == 3:
+            elif self.map == 3:
                 if self.map3chests[index][2] == 0:
+                    self.check_chest_collision(chest)
+            elif self.map == 2:
+                if self.map2chests[index][2] == 0:
                     self.check_chest_collision(chest)
     
     def check_chest_collision(self, chest):
@@ -424,12 +446,14 @@ class Game:
             self.map1chests[index][2] = 1
         if self.map == 3:
             self.map3chests[index][2] = 1
+        if self.map == 2:
+            self.map2chests[index][2] = 1
         self.chests[index] = pygame.image.load("sprites/openchest.png")
         self.coins += 10
                 
     def display_money(self):
-        text = self.font.render(f"COINS: {self.coins}", False, "black")
-        self.screen.blit(text, (300, 10))         
+        text = self.font.render(f"COINS: {self.coins}", False, (255, 255, 255), bgcolor=(0, 0, 0))
+        self.screen.blit(text, (10, 30))         
         
     def check_merchant_interaction(self):
         if self.player.player.colliderect(self.merchant.interactive_collider()):
@@ -657,5 +681,15 @@ class Game:
             if bat.health <= 0:
                 index = self.bats.index(bat)
                 self.bats.pop(index)
+            self.check_bat_player_collision(bat)
+    def check_bat_player_collision(self, bat):
+        if self.player.player.colliderect(bat.bat):
+            self.health -= 0.01
+            self.map = 1
+            self.new_map(self.map)
 
+
+    def display_health(self):
+        text = self.font.render(f"LIVES: {self.health}", False, (255, 255, 255), bgcolor = (0, 0, 0))
+        self.screen.blit(text, (10, 50))
 
