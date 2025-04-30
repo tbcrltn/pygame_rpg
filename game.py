@@ -367,7 +367,7 @@ class Game:
                 self.new_key(key[0], key[1])
 
     def map_keys(self):
-        self.map1keys = [(160, 855)]
+        self.map1keys = [(160, 855), (3450, 865)]
         self.map2keys = [(1000, 850), (210, 1195)]
         self.map3keys = [(740, 690)]
 
@@ -383,7 +383,7 @@ class Game:
     def map_chests(self):
         self.map1chests = [[1035, 145, 0], [775, 1465, 0], [1010, 640, 0]]
         self.map3chests = [[185, 1100, 0]]
-        self.map2chests = [[800, 840, 0]]
+        self.map2chests = [[795, 755, 0]]
 
     def create_chests(self):
         if self.map == 1:
